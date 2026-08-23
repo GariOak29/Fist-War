@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRON FIST - 2D Arcade Fighter</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- HUD Overlay -->
+        <div id="hud">
+            <div class="scanline"></div>
+
+            <div class="top-bar">
+                <div class="player-info p1-info">
+                    <div class="player-name p1-name">JIN</div>
+                    <div class="health-bar-container">
+                        <div id="p1-health" class="health-bar p1-health-fill"></div>
+                        <div id="p1-health-ghost" class="health-bar-ghost p1-ghost"></div>
+                    </div>
+                    <div class="round-wins" id="p1-wins"></div>
+                </div>
+
+                <div class="timer-container">
+                    <div id="timer">60</div>
+                    <div id="round-indicator">ROUND 1</div>
+                </div>
+
+                <div class="player-info p2-info">
+                    <div class="player-name p2-name">PAUL</div>
+                    <div class="health-bar-container">
+                        <div id="p2-health" class="health-bar p2-health-fill"></div>
+                        <div id="p2-health-ghost" class="health-bar-ghost p2-ghost"></div>
+                    </div>
+                    <div class="round-wins" id="p2-wins"></div>
+                </div>
+            </div>
+
+            <!-- Bottom Super EX Meters -->
+            <div class="bottom-bar">
+                <div class="meter-container p1-meter-container">
+                    <div id="p1-meter" class="meter-fill p1-meter-fill"></div>
+                    <span id="p1-meter-text" class="meter-text">HEAT 0%</span>
+                </div>
+                <div class="meter-container p2-meter-container">
+                    <div id="p2-meter" class="meter-fill p2-meter-fill"></div>
+                    <span id="p2-meter-text" class="meter-text">HEAT 0%</span>
+                </div>
+            </div>
+
+            <!-- Combo counters -->
+            <div class="combo-container p1-combo" id="p1-combo-display">
+                <span id="p1-combo-count">0</span> HITS!
+            </div>
+            <div class="combo-container p2-combo" id="p2-combo-display">
+                <span id="p2-combo-count">0</span> HITS!
+            </div>
+
+            <!-- Announcer -->
+            <div id="announcer-text" class="announcer-text" style="display:none;"></div>
+
+            <!-- Controls overlay -->
+            <div class="controls-overlay" id="controls-info">
+                <div class="controls-row">
+                    <span class="ctrl-label">P1:</span> WASD Move | U Jab | I Straight | O Special1 | J K Kicks | L Special2 | <span class="beam-key">B ENERGY BEAM</span> | <span class="super-key">O+L SUPER</span>
+                </div>
+                <div class="controls-row">
+                    <span class="ctrl-label">P2:</span> Arrows Move | Num4/7 Jab | Num5/8 Straight | Num6/9 Special | Num1/4 Kicks | <span class="beam-key">Num0 ENERGY BEAM</span> | <span class="super-key">Num6+3 SUPER</span>
+                </div>
+                <div class="controls-row hint">
+                    BACK=WALK BACK & BLOCK &bull; JUMP ATTACKS &bull; TARGET COMBOS &bull; [M] Moves &bull; [P] Pause &bull; [R] Restart
+                </div>
+            </div>
+        </div>
+
+        <!-- Start Screen / Main Menu -->
+        <div id="start-screen" class="overlay-screen active">
+            <div class="menu-container">
+                <div class="title-content">
+                    <h1 class="game-title">IRON FIST</h1>
+                    <h2 class="game-subtitle">PRO 2D FIGHTER OVERHAUL</h2>
+                </div>
+
+                <div class="menu-sections">
+                    <!-- GAME MODE CHOICE -->
+                    <div class="menu-section">
+                        <label class="section-label">SELECT GAMEPLAY MODE</label>
+                        <div class="option-group" id="mode-select">
+                            <button class="menu-btn mode-btn active" data-mode="pvp">👥 PLAYER vs PLAYER</button>
+                            <button class="menu-btn mode-btn" data-mode="pvc">🤖 PLAYER vs CPU</button>
+                            <button class="menu-btn mode-btn" data-mode="cvc">⚔️ CPU vs CPU</button>
+                        </div>
+                    </div>
+
+                    <!-- FIGHTER SELECTION -->
+                    <div class="menu-section fighters-select-section">
+                        <div class="fighter-picker">
+                            <label class="section-label">P1 FIGHTER</label>
+                            <select id="p1-char-select" class="menu-select">
+                                <option value="jin" selected>JIN (Devil / Martial Art)</option>
+                                <option value="paul">PAUL (Judo / Deathfist)</option>
+                            </select>
+                        </div>
+
+                        <div class="vs-badge">VS</div>
+
+                        <div class="fighter-picker">
+                            <label class="section-label">P2 FIGHTER</label>
+                            <select id="p2-char-select" class="menu-select">
+                                <option value="paul" selected>PAUL (Judo / Deathfist)</option>
+                                <option value="jin">JIN (Devil / Martial Art)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- AI DIFFICULTY -->
+                    <div class="menu-section" id="ai-difficulty-section" style="display:none;">
+                        <label class="section-label">AI DIFFICULTY LEVEL</label>
+                        <div class="option-group" id="diff-select">
+                            <button class="menu-btn diff-btn" data-diff="easy">EASY</button>
+                            <button class="menu-btn diff-btn active" data-diff="normal">NORMAL</button>
+                            <button class="menu-btn diff-btn" data-diff="hard">HARD</button>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="start-fight-btn" class="start-btn">⚡ START MATCH ⚡</button>
+                <p class="blink-text">OR PRESS ENTER TO FIGHT</p>
+            </div>
+        </div>
+
+        <!-- Super Screen -->
+        <div id="super-screen" class="overlay-screen super-bg" style="display:none;">
+            <h1 id="super-announce-text" class="super-title">SUPER ART!</h1>
+        </div>
+
+        <!-- Round Announce -->
+        <div id="round-screen" class="overlay-screen" style="display:none;">
+            <div class="round-announce">
+                <h1 id="round-text" class="neon-text">ROUND 1</h1>
+                <h2 id="fight-text" class="fight-text" style="display:none;">FIGHT!</h2>
+            </div>
+        </div>
+
+        <!-- KO Screen -->
+        <div id="ko-screen" class="overlay-screen" style="display:none;">
+            <div class="ko-content">
+                <h1 class="ko-text">K.O.</h1>
+                <h2 id="winner-text" class="winner-text"></h2>
+            </div>
+        </div>
+
+        <!-- Victory Screen -->
+        <div id="victory-screen" class="overlay-screen" style="display:none;">
+            <div class="victory-content">
+                <h1 id="victory-text" class="victory-text"></h1>
+                <p class="blink-text">PRESS ENTER TO PLAY AGAIN</p>
+            </div>
+        </div>
+
+        <!-- Move List -->
+        <div id="move-list" class="overlay-panel" style="display:none;">
+            <h2>MOVE LIST & MECHANICS</h2>
+            <div class="move-columns">
+                <div class="move-col">
+                    <h3>P1 - JIN</h3>
+                    <ul>
+                        <li><span class="key">W</span> Jump</li>
+                        <li><span class="key">S</span> Crouch</li>
+                        <li><span class="key">A</span> Walk Back & Block</li>
+                        <li><span class="key">D</span> Walk Forward</li>
+                        <li><span class="key">U</span> Jab (Quick)</li>
+                        <li><span class="key">I</span> Straight (Power)</li>
+                        <li><span class="key">O</span> Electric Wind God Fist (Launcher)</li>
+                        <li><span class="key">J</span> Low Kick</li>
+                        <li><span class="key">K</span> High Kick</li>
+                        <li><span class="key">B</span> 💥 3D ENERGY BEAM BLAST 💥</li>
+                        <li><span class="key">O + L</span> ⚡ DEVIL RAGE SUPER ART ⚡ (100% Heat)</li>
+                    </ul>
+                </div>
+                <div class="move-col">
+                    <h3>P2 - PAUL</h3>
+                    <ul>
+                        <li><span class="key">↑</span> Jump</li>
+                        <li><span class="key">↓</span> Crouch</li>
+                        <li><span class="key">← / →</span> Walk & Block</li>
+                        <li><span class="key">Num4 / 7</span> Jab (Quick)</li>
+                        <li><span class="key">Num5 / 8</span> Straight (Power)</li>
+                        <li><span class="key">Num6 / 9</span> Phoenix Smasher (Launcher)</li>
+                        <li><span class="key">Num1 / 4</span> Low Kick</li>
+                        <li><span class="key">Num2 / 5</span> High Kick</li>
+                        <li><span class="key">Num0 / ,</span> 💥 3D ENERGY BEAM BLAST 💥</li>
+                        <li><span class="key">Num6 + 3</span> 🔥 BURNING DEATHFIST SUPER ART 🔥</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mechanics-info">
+                <h4>PRO MECHANICS:</h4>
+                <p>&bull; <b>Backward Walk & Guard:</b> Hold Back (`A` / `Right Arrow`) to walk backward away from opponent while guarding incoming strikes!</p>
+                <p>&bull; <b>Energy Beam:</b> Press `B` (P1) or `Num0` (P2) to blast a full-screen glowing 3D energy beam across the stage!</p>
+                <p>&bull; <b>Aerial Attacks:</b> Press Punch/Kick while in mid-air (`Jump + Punch/Kick`) to land jumping strikes!</p>
+            </div>
+            <p class="move-list-close">Press [M] to close</p>
+        </div>
+    </div>
+
+    <!-- Three.js -->
+    <script src="js/lib/three.min.js"></script>
+    <script>
+        if (typeof THREE === 'undefined') {
+            document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');
+        }
+    </script>
+
+    <!-- Engine -->
+    <script src="js/engine/camera.js"></script>
+    <script src="js/engine/input.js"></script>
+    <script src="js/engine/audio.js"></script>
+    <script src="js/engine/particles.js"></script>
+    <script src="js/engine/ai.js"></script>
+    <!-- Entities -->
+    <script src="js/entities/stage.js"></script>
+    <script src="js/entities/character.js"></script>
+    <!-- Physics -->
+    <script src="js/physics/combat.js"></script>
+    <!-- Main -->
+    <script src="js/main.js"></script>
+</body>
+</html>
